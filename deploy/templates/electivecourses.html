@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Recommendations</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .header {
+            width: 100%;
+            background-color: #4a148c;
+            color: #fff;
+            z-index: 1
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        .header .title {
+            font-size: 2em;
+            margin: 0;
+            padding-top: 50px; /* Add padding to create space for the advisor tape */
+        }
+        .header .advisor-tape {
+            background-color: #ffa500;
+            color: #000;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 8px;
+            position: absolute;
+            top: 0; /* Adjust to position relative to the header */
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: -30px; /* Adjust this value to fine-tune the alignment */
+        }
+        .content {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .select-number {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .select-number label {
+            color: #333;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .select-number select {
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .course-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .course-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        .course-card .order {
+            background-color: #ffa500;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 50%;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+        }
+        .course-card h3 {
+            margin-top: 0;
+            font-size: 18px;
+            color: #4a148c;
+            background-color: #f3e5f5;
+            border-radius: 8px 8px 0 0;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        .course-card p {
+            margin: 0;
+            padding: 10px 20px;
+            color: #666;
+        }
+        .logout-btn {
+            background-color: #e53935;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+        .logout-btn:hover {
+            background-color: #b71c1c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title" id="courseTitle">Loading...</h1>
+            <div class="advisor-tape">Morshedy Academic Advisor</div>
+        </div>
+
+        <div class="content">
+            <div class="select-number">
+                <label for="numCourses">Number of Recommended Courses:</label>
+                <select id="numCourses">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5" selected>5</option>
+                </select>
+            </div>
+
+            <div id="courseList" class="course-cards">
+                <!-- Courses will be dynamically added here based on selection -->
+            </div>
+        </div>
+
+        <a href="login.html" class="logout-btn">Logout</a>
+    </div><script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var numCoursesSelect = document.getElementById('numCourses');
+            var courseList = document.getElementById('courseList');
+            var courseTitle = document.getElementById('courseTitle');
+    
+            // Preload data passed from Flask
+            var studentName = "{{ student_name }}";
+            var recommendations = {{ recommendations|tojson }};
+            
+            //var descs={{ descs|tojson }};
+            //Description not available due to API error
+            var descs = [
+                "Description not available due to API error",
+                "Description not available due to API error",
+                "Description not available due to API error",
+                "Description not available due to API error",
+                "Description not available due to API error"
+            ]; // Hardcoded descriptions for demonstration
+    
+            // Set course title with student's name
+            courseTitle.textContent = "Recommended Courses for: " + studentName;
+    
+            // Function to update course list based on selection
+            function updateCourseList() {
+                var numCourses = parseInt(numCoursesSelect.value);
+                courseList.innerHTML = ''; // Clear current courses
+    
+                // Add new courses based on selection
+                for (var i = 0; i < numCourses && i < recommendations.length; i++) {
+                    var course = recommendations[i];
+                    var desc = descs[i]; // Get description for current course
+                    var div = document.createElement('div');
+                    div.className = 'course-card';
+                    div.innerHTML = '<div class="order">' + (i + 1) + '</div><h3>' + course[1] + '</h3><p>' + desc + '</p>';
+                    courseList.appendChild(div);
+                }
+            }
+    
+            // Initial update based on default selection
+            updateCourseList();
+    
+            // Listen for changes in the select dropdown
+            numCoursesSelect.addEventListener('change', function() {
+                updateCourseList();
+            });
+    
+            // Logout button functionality
+            var logoutBtn = document.getElementById('logoutBtn');
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent default link behavior
+                // Redirect to the login page
+                window.location.href = "login.html"; // Replace with your actual login page URL
+            });
+        });
+    </script>
+</body>
+</html>
