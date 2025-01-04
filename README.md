@@ -36,8 +36,8 @@ The model uses the student’s history of final grades in various subjects as ex
 ## Project Recommendations Sample:
 
 
+![ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/0647387a-075e-437a-beee-eb1157bfb97c)
 
-https://github.com/user-attachments/assets/5511b6ab-6943-43dd-ac38-ec61644ef56c
 
 
 
